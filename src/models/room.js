@@ -26,7 +26,7 @@ const roomschema= new mongoose.Schema({
         required:true,
     },
     facilities:{
-        type:[string],
+        type:[String],
         default:[],
     },
     owner:{
@@ -37,4 +37,4 @@ const roomschema= new mongoose.Schema({
 {timestamps: true,}
 );
 
-mongoose.exports=mongoose.model("Room",roomschema);
+module.exports=mongoose.model("Room",roomschema);
