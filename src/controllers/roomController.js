@@ -8,12 +8,18 @@ const addRoom= async (req,res)=>{
         message: "All fields are required",
       });
     }
+    const images = req.files?.map(file => ({
+  url: file.path,
+  public_id: file.filename,
+}));
+
 
       const room =await Room.create({
         title,
         city,
         area,
         rent,
+        images,
         owner: req.user.id,
       });
         res.status(201).json({
@@ -29,29 +35,75 @@ const addRoom= async (req,res)=>{
 
     const getallroom= async (req,res)=> {
         
-        try {
+        const getallroom = async (req, res) => {
+  try {
+    const {
+      city,
+      minRent,
+      maxRent,
+      facilities,
+      sort = "createdAt",
+      page = 1,
+      limit = 10,
+    } = req.query;
 
-            const{city,maxRent}=req.query;
-            let filter={};
+    let filter = {};
 
-             if (city) {
-      filter.city = city;
+    // 🔹 City filter
+    if (city) {
+      filter.city = city.toLowerCase();
     }
 
-    if (maxRent) {
-      filter.rent = { $lte: Number(maxRent) };
+    // 🔹 Rent range filter
+    if (minRent || maxRent) {
+      filter.rent = {};
+      if (minRent) filter.rent.$gte = Number(minRent);
+      if (maxRent) filter.rent.$lte = Number(maxRent);
     }
-    const rooms = await Room.find(filter);
+
+    // 🔹 Facilities filter
+    if (facilities) {
+      filter.facilities = {
+        $in: facilities.split(","),
+      };
+    }
+
+    // 🔹 Sorting
+    let sortOption = {};
+    if (sort) {
+      const field = sort.replace("-", "");
+      const order = sort.startsWith("-") ? -1 : 1;
+      sortOption[field] = order;
+    }
+
+    // 🔹 Pagination
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // 🔹 Query
+    const rooms = await Room.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNumber)
+      .populate("owner", "name email");
+
+    const totalRooms = await Room.countDocuments(filter);
 
     res.status(200).json({
-      count: rooms.length,
-      rooms: rooms,
+      page: pageNumber,
+      limit: limitNumber,
+      totalRooms,
+      totalPages: Math.ceil(totalRooms / limitNumber),
+      rooms,
     });
   } catch (error) {
     res.status(500).json({
       message: error.message,
     });
   }
+};
+
     }
 
     const getsingleroom= async (req,res)=>{

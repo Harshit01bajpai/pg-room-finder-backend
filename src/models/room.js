@@ -33,6 +33,13 @@ const roomschema= new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user",
     },
+    images: [
+  {
+    url: String,
+    public_id: String,
+  }
+],
+
 },
 {timestamps: true,}
 );

@@ -1,6 +1,8 @@
 const User=require("../models/user");
 const bcrypt=require("bcryptjs");
 const jwt=require("jsonwebtoken");
+const cloudinary = require("../config/coudinary");
+
 
 const registerUser= async (req,res)=>{
     try{
@@ -73,6 +75,39 @@ const loginUser= async (req,res)=>{
     });
   }
 };
+const updateProfilePicture = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // 1️⃣ Agar pehle se image hai → delete
+    if (user.profilePic && user.profilePic.public_id) {
+      await cloudinary.uploader.destroy(user.profilePic.public_id);
+    }
+
+    // 2️⃣ Nayi image set karo
+    user.profilePic = {
+      url: req.file.path,
+      public_id: req.file.filename,
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      profilePic: user.profilePic,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 
-module.exports = { registerUser, loginUser };
+module.exports = { registerUser, loginUser,updateProfilePicture };
