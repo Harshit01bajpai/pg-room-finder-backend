@@ -211,4 +211,41 @@ const deleteroom= async (req,res)=>{
   }
 }
 
-    module.exports={addRoom,getallroom,getsingleroom,getmyroom,updateroom,deleteroom};
+const getCityWiseStats = async (req, res) => {
+  try {
+    const stats = await Room.aggregate([
+      // Group by city
+      {
+        $group: {
+          _id: "$city",
+          avgRent: { $avg: "$rent" },
+          totalRooms: { $sum: 1 },
+        },
+      },
+
+      // Sort by average rent (high to low)
+      {
+        $sort: { avgRent: -1 },
+      },
+
+      //  Shape final output
+      {
+        $project: {
+          _id: 0,
+          city: "$_id",
+          avgRent: 1,
+          totalRooms: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json(stats);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+
+    module.exports={addRoom,getallroom,getsingleroom,getmyroom,updateroom,deleteroom,getCityWiseStats};
