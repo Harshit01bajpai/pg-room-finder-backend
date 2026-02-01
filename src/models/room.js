@@ -23,7 +23,6 @@ const roomschema= new mongoose.Schema({
     type:{
         type:[String],
         enum:["PG","Room"],
-        required:true,
     },
     facilities:{
         type:[String],
@@ -31,7 +30,7 @@ const roomschema= new mongoose.Schema({
     },
     owner:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"user",
+        ref:"User",
     },
     images: [
   {

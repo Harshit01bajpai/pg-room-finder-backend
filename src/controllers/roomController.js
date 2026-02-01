@@ -33,9 +33,9 @@ const addRoom= async (req,res)=>{
   }
     };
 
-    const getallroom= async (req,res)=> {
+   
         
-        const getallroom = async (req, res) => {
+    const getallroom = async (req, res) => {
   try {
     const {
       city,
@@ -104,7 +104,7 @@ const addRoom= async (req,res)=>{
   }
 };
 
-    }
+    
 
     const getsingleroom= async (req,res)=>{
         try{
@@ -119,7 +119,7 @@ const addRoom= async (req,res)=>{
 
     res.status(200).json(room);
 
-        }catch{error}{
+        }catch(error){
              res.status(400).json({
       message: "Invalid room id",
     });
@@ -247,5 +247,42 @@ const getCityWiseStats = async (req, res) => {
   }
 };
 
+const getRoomsWithOwner = async (req, res) => {
+  try {
+    const rooms = await Room.aggregate([
+      // 1️⃣ Join users collection
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "ownerDetails",
+        },
+      },
 
-    module.exports={addRoom,getallroom,getsingleroom,getmyroom,updateroom,deleteroom,getCityWiseStats};
+      // 2️⃣ Optional: ownerDetails array ko object bana do
+      {
+        $unwind: "$ownerDetails",
+      },
+
+      // 3️⃣ Optional: sirf required fields dikhao
+      {
+        $project: {
+          title: 1,
+          city: 1,
+          rent: 1,
+          "ownerDetails.name": 1,
+          "ownerDetails.email": 1,
+        },
+      },
+    ]);
+
+    res.status(200).json(rooms);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+    module.exports={addRoom,getallroom,getsingleroom,getmyroom,updateroom,deleteroom,getCityWiseStats,getRoomsWithOwner};
