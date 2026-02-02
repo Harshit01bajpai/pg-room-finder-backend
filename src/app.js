@@ -3,6 +3,7 @@ const authRoutes=require("./routes/authRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const reviewsRoutes=require("./routes/reviewsRoutes");
 const bookingRoutes=require("./routes/bookingRoutes");
+const favoriteRoutes=require("./routes/favoriteRoutes");
 
 
 
@@ -18,5 +19,6 @@ app.get("/",(req,res)=>{
 });
 app.use("/api/review",reviewsRoutes);
 app.use("/api/booking",bookingRoutes);
+app.use("/api/favorite",favoriteRoutes);
 
 module.exports=app;
