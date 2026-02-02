@@ -284,5 +284,50 @@ const getRoomsWithOwner = async (req, res) => {
 };
 
 
+const getRoomsWithRatings = async (req, res) => {
+  try {
+    const rooms = await Room.aggregate([
+      // 1️⃣ Join reviews collection
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "room",
+          as: "reviews",
+        },
+      },
 
-    module.exports={addRoom,getallroom,getsingleroom,getmyroom,updateroom,deleteroom,getCityWiseStats,getRoomsWithOwner};
+      // 2️⃣ Calculate rating fields
+      {
+        $addFields: {
+          totalReviews: { $size: "$reviews" },
+          avgRating: {
+            $cond: [
+              { $gt: [{ $size: "$reviews" }, 0] },
+              { $avg: "$reviews.rating" },
+              0,
+            ],
+          },
+        },
+      },
+
+      // 3️⃣ Clean output
+      {
+        $project: {
+          title: 1,
+          city: 1,
+          rent: 1,
+          avgRating: { $round: ["$avgRating", 1] },
+          totalReviews: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json(rooms);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+module.exports={addRoom,getallroom,getsingleroom,getmyroom,updateroom,deleteroom,getCityWiseStats,getRoomsWithOwner,getRoomsWithRatings};
