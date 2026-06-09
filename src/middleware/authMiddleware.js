@@ -14,7 +14,7 @@ const authmiddleware= (req,res,next)=>{
     }
 
     // 3️⃣ Check: Bearer token format
-    if (!authHeader.startsWith("Bearer ")) {
+    if (!authHeader.startsWith("Bearer")) {
       return res.status(401).json({
         message: "Invalid token format",
       });
