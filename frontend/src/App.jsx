@@ -46,7 +46,7 @@ export default function App() {
   async function loadRooms() {
     try {
       const data = await api.rooms();
-      setRooms(data.rooms?.length ? data.rooms : demoRooms);
+      setRooms(data.rooms || []);
     } catch {
       setRooms(demoRooms);
     } finally {
