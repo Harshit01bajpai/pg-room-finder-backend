@@ -1,7 +1,7 @@
 const Room= require("../models/room");
 
 const addRoom= async (req,res)=>{
-   try{ const {title,city,area,rent}=req.body;
+   try{ const {title,city,area,rent,type,facilities}=req.body;
 
       if (!title || !city || !rent||!area) {
       return res.status(400).json({
@@ -19,6 +19,10 @@ const addRoom= async (req,res)=>{
         city,
         area,
         rent,
+        type: type ? [type] : ["Room"],
+        facilities: facilities
+          ? facilities.split(",").map(item => item.trim()).filter(Boolean)
+          : [],
         images,
         owner: req.user.id,
       });
