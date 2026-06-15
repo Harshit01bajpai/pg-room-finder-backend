@@ -8,14 +8,18 @@ const rateLimit = require("express-rate-limit");
 
 const registerUser= async (req,res)=>{
     try{
-        const {name,email,password,role}=req.body;
+        const {name,email,password,confirmpassword,role}=req.body;
 
          if (!name || !email || !password) {
       return res.status(400).json({
         message: "Name, email and password are required",
       });
     }
-
+     if(password!==confirmpassword){
+      return res.status(400).json({
+        message: "password do not match",
+      });
+     }
     const existingUser=await User.findOne({ email });
      if (existingUser) {
       return res.status(400).json({
@@ -202,7 +206,7 @@ const verifyOtp= async (req,res)=>{
 
  const resetPassword= async (req,res)=>{
   try{
-    const{email,otp,newpassword}=req.body;
+    const{email,otp,newpassword,confirmpassword}=req.body;
      
     const record=await Otp.findOne({email});
 
@@ -222,7 +226,11 @@ const verifyOtp= async (req,res)=>{
         message: "OTP expired",
       });
     }
-
+     if(newpassword!==confirmpassword){
+       return res.status(400).json({
+        message: "password do not match",
+      });
+     }
    
      
     const hashedpassword= await bcrypt.hash(newpassword,10);
