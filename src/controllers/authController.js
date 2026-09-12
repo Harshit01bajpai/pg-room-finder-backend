@@ -215,7 +215,8 @@ const verifyOtp= async (req,res)=>{
         message: "OTP not found or expired",
       });
     }
-    if (record.otp !== otp) {
+    const isMatch = await bcrypt.compare(otp,record.otp);
+    if (!isMatch) {
       return res.status(400).json({
         message: "Invalid OTP",
       });
